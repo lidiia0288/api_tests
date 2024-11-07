@@ -464,24 +464,6 @@ test("35 PUT /challenger/guid RESTORE @PUT", async ({ request }) => {
   expect(response.status()).toBe(200);
 });
 
-test("36 PUT /challenger/guid CREATE @PUT", async ({ request }) => {
-    await request.put(`${URL}challenger/${token}`, {
-      headers: {
-        "x-challenger": token,
-      },
-      data: {}
-    });
-
-    let response = await request.put(`${URL}challenger/${token}`, {
-      headers: {
-        "x-challenger": token,
-      },
-      data: payload
-    });
-
-    expect(response.status()).toBe(200);
-  });
-
   test("37 GET /challenger/database/guid (200) @GET", async ({ request }) => {
     let response = await request.get(`${URL}challenger/database/${token}`, {
       headers: {
@@ -762,5 +744,34 @@ test("36 PUT /challenger/guid CREATE @PUT", async ({ request }) => {
       expect(response.status()).toBe(400);
       expect(headers["x-challenger"]).toEqual(token);
     });
+
+    test("36 PUT /challenger/guid CREATE @PUT", async ({ request }) => {
+      //Генерируем новый токен
+      let newToken = faker.string.uuid();
+      console.log (newToken);
+  
+      let getResponse = await request.get(`${URL}challenger/${token}`, {
+          headers: {
+              'x-challenger': token
+          },
+      });
+  
+      let newPayload = await getResponse.json(); 
+  
+  
+      // Подставляем newToken в newPayload
+      newPayload["xChallenger"] = newToken;
+      
+      let response = await request.put(`${URL}challenger/${newToken}`, {
+          headers: {
+              'x-challenger': newToken
+          },
+          data:newPayload
+      });
+  
+      //Проверяем статус ответа
+      expect (response.status()).toBe(201);
+  
+  });
 
 });
